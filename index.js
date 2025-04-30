@@ -13,9 +13,22 @@ const pool = new Pool({
 
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-    const hash = await bcrypt.hash(password, 10);
-    await pool.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', [username, hash]);
-    res.send('User registered');
+    try {
+        const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (existingUser.rows.length > 0) {
+            return res.json({ success: false, message: 'Username already taken' });
+        }
+
+        const hash = await bcrypt.hash(password, 10);
+
+        await pool.query('INSERT INTO users (username, password_hash) VALUES ($1, $2)', [username, hash]);
+        println("user kaydı basarılı oldu")
+        return res.json({ success: true, message: 'User registered successfully' });
+    } catch (err) {
+        println("user kaydı basarısız oldu")
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'An error occurred during registration' });
+    }
 });
 
 app.post('/login', async (req, res) => {
