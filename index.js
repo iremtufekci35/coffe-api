@@ -39,6 +39,12 @@ app.get('/users', async (req, res) => {
         res.status(500).send('An error occurred while fetching users');
     }
 });
-
+app.get('/', async (req, res) => {
+    try {
+       res.send("Welcome To The CoffeApp")
+    } catch (err) {
+        console.error('Error fetching users:', err);
+    }
+});
 //192.168.5.99
 app.listen(3000, () => console.log('API running on port 3000'));
