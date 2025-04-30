@@ -1,6 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -40,5 +40,5 @@ app.get('/users', async (req, res) => {
     }
 });
 
-
+//192.168.5.99
 app.listen(3000, () => console.log('API running on port 3000'));
