@@ -1,0 +1,17 @@
+[
+    {
+      "id": 1,
+      "name": "Vanilla",
+      "flavor": "Vanilya",
+      "description": "Tatlı ve yumuşak bir vanilya aroması.",
+      "price": 25.0
+    },
+    {
+      "id": 2,
+      "name": "Caramel",
+      "flavor": "Karamele",
+      "description": "Zengin ve yoğun karamel aroması.",
+      "price": 30.0
+    }
+  ]
+  
