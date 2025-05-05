@@ -15,49 +15,46 @@ const pool = new Pool({
 });
 
 app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  // Kullanıcı adı ve şifre kontrolü
-  if (!username || !password) {
-    return res.status(400).send('Username and password are required');
+  if (!email || !password) {
+    return res.status(400).send('Email and password are required');
   }
 
   try {
-    // Kullanıcı adı veritabanında var mı kontrol et
-    const checkUserQuery = 'SELECT * FROM users WHERE username = $1';
-    const userResult = await pool.query(checkUserQuery, [username]);
+    const checkUserQuery = 'SELECT * FROM users WHERE email = $1';
+    const userResult = await pool.query(checkUserQuery, [email]);
 
     if (userResult.rows.length > 0) {
-      // Kullanıcı zaten varsa, uygun mesajla dön
       return res.status(400).json({
         success: false,
-        message: 'Kullanıcı adı zaten mevcut',
+        message: 'Bu email adresi zaten kayıtlı',
       });
     }
 
-    // Kullanıcı adı mevcut değilse, şifreyi hashle
     const hash = await bcrypt.hash(password, 10);
 
-    // Yeni kullanıcıyı veritabanına ekle
     const result = await pool.query(
-      'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
-      [username, hash]
+      'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email',
+      [email, hash]
     );
 
     const newUser = result.rows[0];
-    console.log(`User ${newUser.username} registered successfully`);
 
-    // Başarılı kayıt mesajı dön
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
-      user: { id: newUser.id, username: newUser.username },
+      message: 'Kayıt başarılı',
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+      },
     });
   } catch (err) {
-    console.error('Error during registration:', err);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error('Kayıt sırasında hata:', err);
+    res.status(500).json({ success: false, message: 'Sunucu hatası' });
   }
 });
+
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
