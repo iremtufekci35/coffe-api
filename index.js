@@ -17,13 +17,28 @@ const pool = new Pool({
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
 
+  // Kullanıcı adı ve şifre kontrolü
   if (!username || !password) {
     return res.status(400).send('Username and password are required');
   }
 
   try {
+    // Kullanıcı adı veritabanında var mı kontrol et
+    const checkUserQuery = 'SELECT * FROM users WHERE username = $1';
+    const userResult = await pool.query(checkUserQuery, [username]);
+
+    if (userResult.rows.length > 0) {
+      // Kullanıcı zaten varsa, uygun mesajla dön
+      return res.status(400).json({
+        success: false,
+        message: 'Kullanıcı adı zaten mevcut',
+      });
+    }
+
+    // Kullanıcı adı mevcut değilse, şifreyi hashle
     const hash = await bcrypt.hash(password, 10);
 
+    // Yeni kullanıcıyı veritabanına ekle
     const result = await pool.query(
       'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id, username',
       [username, hash]
@@ -32,6 +47,7 @@ app.post('/register', async (req, res) => {
     const newUser = result.rows[0];
     console.log(`User ${newUser.username} registered successfully`);
 
+    // Başarılı kayıt mesajı dön
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -51,7 +67,6 @@ app.post('/login', async (req, res) => {
     const user = result.rows[0];
 
     if (user && await bcrypt.compare(password, user.password_hash)) {
-      // Create a JWT token
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
       console.log(`User ${user.username} logged in successfully`);
 
