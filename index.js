@@ -14,6 +14,14 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+pool.connect()
+  .then(() => {
+    console.log("PostgreSQL bağlantısı başarılı!");
+  })
+  .catch((err) => {
+    console.error("Veritabanı bağlantısı hatası:", err);
+  });
+  
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
 
