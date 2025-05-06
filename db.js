@@ -29,6 +29,7 @@ client.connect()
     console.log('Users tablosu:', res.rows);
   })
   .catch(err => {
+    console.error("BAĞLANTI HATALI", err);
     console.error('Veritabanı bağlantı hatası:', err);
   })
   .finally(() => {
