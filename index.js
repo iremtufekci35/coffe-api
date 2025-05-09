@@ -44,6 +44,7 @@ app.post('/register', async (req, res) => {
       });
     }
 
+  
     const hash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
@@ -69,15 +70,15 @@ app.post('/register', async (req, res) => {
 
 
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     const user = result.rows[0];
 
     if (user && await bcrypt.compare(password, user.password_hash)) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log(`User ${user.username} logged in successfully`);
+      console.log(`User ${user.email} logged in successfully`);
 
       res.json({
         success: true,
@@ -85,7 +86,7 @@ app.post('/login', async (req, res) => {
         token: token,
       });
     } else {
-      console.log(`Invalid credentials for user ${username}`);
+      console.log(`Invalid credentials for user ${email}`);
       res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
   } catch (err) {
